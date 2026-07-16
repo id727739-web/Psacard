@@ -1,36 +1,37 @@
-# Claude Mannequin · Ultracode Effects
+# Claude Creature · Five Tricks
 
-Five hand-built pixel-art animations of the Claude **mannequin** — the little
-poseable orange figure you see hammering away on the Ultracode card while a big
-coding task plans itself.
+Five hand-built pixel-art animations of the little terracotta **Claude creature**
+— the blocky guy with two black square eyes from the sticker — doing fun stuff.
 
 Open `index.html` in any browser. No build step, no dependencies, no image
-assets — every frame (mannequin, sparks, orbs, rocket, bugs) is drawn live on a
-240×180 pixel canvas and scaled up crisp.
+assets: every frame (the creature, its instruments, notes, sparks and floors) is
+drawn live on a 240×180 pixel canvas and scaled up crisp.
 
-## The five loops
+## The five tricks
 
-| # | Mode | What happens |
-|---|------|--------------|
-| 01 | **Ultracode / Forge** | Mannequin hammers a glowing workpiece, gold sparks fly on each strike. |
-| 02 | **Ship it / Deploy** | Rides the deploy rocket up through a drifting starfield with a flame exhaust. |
-| 03 | **Parallel** | Juggles three coloured task orbs in a continuous arc. |
-| 04 | **Debug** | Mallet out, squashing pixel bugs that scuttle in from the edge. |
-| 05 | **Overclock** | Charges a power-up aura, the screen shakes, lightning cracks at the peak. |
+| # | Trick | What happens |
+|---|-------|--------------|
+| 01 | **Guitar solo** | Headbangs and shreds a pixel guitar while music notes drift up off the strings. |
+| 02 | **Drum fill** | Alternating sticks on the toms, cymbal shimmering on the off-beat. |
+| 03 | **Disco** | Shuffles across a colour-cycling dance floor under a spinning mirror ball. |
+| 04 | **On the decks** | Headphones on, scratching a spinning record over a live EQ. |
+| 05 | **Kickflip** | Rolls in, pops an ollie and flips the board on a loop. |
 
 ## Controls
 
-- Click a mode in the list, or press keys **1**–**5**
+- Click a trick in the list, or press keys **1**–**5**
 - **Space** — play / pause
 - **Replay** — restart the current loop with the mosaic reveal
 - **Speed** slider — 0.4×–1.8×
 
 ## How it works
 
-- A single poseable `mannequin()` routine draws the wooden-figure character from
-  articulated ball-joints (head, spine, two-segment arms and legs). Every scene
-  just feeds it different joint angles over time.
-- Limbs are pixel capsules (discs stamped along each bone), so any pose stays
-  authentically blocky.
-- A lightweight particle pool handles sparks, exhaust, orbs and bug explosions.
-- Respects `prefers-reduced-motion` (renders a single static pose instead of animating).
+- One `creature()` routine draws the character from simple pixel blocks: rounded
+  body (`#da7757`), the two iconic black square eyes (with blink / happy `^^`
+  states), stubby legs and side arms. Each scene feeds it a pose, a squash/bounce
+  and hand positions.
+- Instruments and props (guitar, drum kit, turntable, skateboard, disco floor)
+  are drawn with plain pixel rectangles and discs — chunky diagonals via
+  stair-stepping, spins via `sin`/`cos`, so everything stays grid-crisp.
+- A small particle pool handles sparks and floating music notes.
+- Respects `prefers-reduced-motion` (renders one static pose instead of animating).
