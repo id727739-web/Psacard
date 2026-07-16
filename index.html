@@ -1,0 +1,604 @@
+<title>Claude Mannequin · Ultracode Effects</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#100e1a; --panel:#181528; --panel-2:#1f1b33;
+    --line:#2c2743; --text:#ece8ff; --muted:#a89ccb; --lav:#c9b8f0;
+    --violet:#6a4bc0; --violet-deep:#3a2470; --violet-line:#7d5ae0;
+    --rust:#c15f2e; --gold:#ffd76a; --stage-h:420px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1200px 700px at 78% -10%, #241a3d 0%, transparent 55%),
+      radial-gradient(900px 600px at 8% 110%, #1a1330 0%, transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .brand{display:flex;flex-direction:column;gap:6px}
+  .kicker{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted)}
+  h1{
+    margin:0;font-size:clamp(26px,4.4vw,40px);line-height:1.02;letter-spacing:-.5px;
+    text-wrap:balance;font-weight:800;
+  }
+  h1 .amp{color:var(--gold)}
+  .sub{color:var(--muted);font-size:13px;max-width:52ch;line-height:1.5}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);
+    border-radius:999px;background:linear-gradient(180deg,#201a38,#171226);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--lav);white-space:nowrap;
+  }
+  .dot{width:8px;height:8px;border-radius:2px;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+
+  .layout{display:grid;grid-template-columns:1.35fr .9fr;gap:20px;align-items:start}
+  @media(max-width:820px){.layout{grid-template-columns:1fr}}
+
+  /* ---- Stage card (the Ultracode card) ---- */
+  .stage-card{
+    position:relative;border-radius:20px;overflow:hidden;isolation:isolate;
+    background:linear-gradient(140deg,var(--violet) 0%, #4a319e 45%, var(--violet-deep) 100%);
+    border:1px solid var(--violet-line);
+    box-shadow:0 24px 60px -24px rgba(70,40,150,.75), inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  .stage-head{
+    position:absolute;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;pointer-events:none;
+  }
+  .stage-title{display:flex;flex-direction:column;gap:3px}
+  .stage-title b{font-size:15px;letter-spacing:.02em}
+  .stage-title span{font-size:11px;color:rgba(255,255,255,.72);letter-spacing:.04em}
+  .stage-tag{
+    pointer-events:none;font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+    background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.2);padding:5px 9px;border-radius:8px;color:#fff;
+  }
+  canvas#stage{display:block;width:100%;height:var(--stage-h);image-rendering:pixelated;image-rendering:crisp-edges}
+  /* pixel grid overlay like the app card */
+  .grid-ov{position:absolute;inset:0;z-index:2;pointer-events:none;mix-blend-mode:overlay;opacity:.5;
+    background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+    background-size:20px 20px;}
+  .vignette{position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 30%,transparent 55%,rgba(20,8,40,.55) 100%)}
+  /* mosaic reveal tiles */
+  .mosaic{position:absolute;inset:0;z-index:5;display:grid;pointer-events:none}
+  .mosaic i{background:#0e0a1c}
+
+  .stage-foot{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;gap:10px;align-items:center;
+    padding:12px 14px;background:linear-gradient(0deg,rgba(20,10,45,.6),transparent)}
+  .ctrl{appearance:none;cursor:pointer;font:inherit;color:var(--text);letter-spacing:.1em;text-transform:uppercase;font-size:11px;
+    background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.22);border-radius:9px;padding:8px 12px;transition:.15s}
+  .ctrl:hover{background:rgba(0,0,0,.5);border-color:#fff}
+  .ctrl:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .speed{margin-left:auto;display:flex;gap:6px;align-items:center;color:rgba(255,255,255,.8);font-size:11px;letter-spacing:.08em}
+  .speed input{accent-color:var(--gold)}
+
+  /* ---- Selector (mirrors the Aufwand list) ---- */
+  .picker{display:flex;flex-direction:column;gap:10px}
+  .picker h2{margin:2px 2px 2px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .opt{
+    text-align:left;cursor:pointer;font:inherit;color:var(--text);
+    display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:12px;
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+    border-radius:14px;padding:13px 14px;transition:.16s ease;position:relative;overflow:hidden;
+  }
+  .opt:hover{border-color:#463c68;transform:translateY(-1px)}
+  .opt:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .opt .ico{width:40px;height:40px;border-radius:10px;image-rendering:pixelated;display:block;
+    background:linear-gradient(140deg,#5a3fb0,#2f1f63);border:1px solid #6a4bc0}
+  .opt .txt b{display:block;font-size:15px;letter-spacing:.01em}
+  .opt .txt span{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
+  .opt .num{font-size:11px;color:var(--muted);letter-spacing:.14em;font-variant-numeric:tabular-nums}
+  .opt[aria-selected="true"]{
+    border-color:var(--violet-line);
+    background:linear-gradient(140deg,var(--violet) 0%,#472f96 60%,var(--violet-deep) 100%);
+    box-shadow:0 14px 30px -16px rgba(90,50,180,.9), inset 0 1px 0 rgba(255,255,255,.16);
+  }
+  .opt[aria-selected="true"] .txt span{color:rgba(255,255,255,.82)}
+  .opt[aria-selected="true"] .num{color:var(--gold)}
+  .opt[aria-selected="true"] .ico{border-color:#fff;box-shadow:0 0 0 1px rgba(255,255,255,.35)}
+
+  footer.foot{margin-top:26px;color:var(--muted);font-size:11.5px;letter-spacing:.03em;line-height:1.6;
+    border-top:1px solid var(--line);padding-top:14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  footer.foot kbd{font:inherit;background:var(--panel-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--lav)}
+
+  @media (prefers-reduced-motion:reduce){
+    .opt{transition:none}
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="kicker">Ultracode · effects reel</span>
+      <h1>The Claude Mannequin <span class="amp">&</span> five pixel loops</h1>
+      <p class="sub">Pick an effort mode — each one drops the little poseable mannequin into the Ultracode card and runs a hand-built pixel animation. Same character you see hammering away while a big coding task plans itself.</p>
+    </div>
+    <span class="badge"><span class="dot"></span> 60fps · canvas · no assets</span>
+  </header>
+
+  <div class="layout">
+    <!-- STAGE -->
+    <section class="stage-card" aria-label="Animation stage">
+      <div class="stage-head">
+        <div class="stage-title"><b id="stName">Ultracode</b><span id="stDesc">Große Programmieraufgabe · Claude plant und baut.</span></div>
+        <div class="stage-tag" id="stTag">FORGE</div>
+      </div>
+      <canvas id="stage" width="240" height="180" role="img" aria-label="Animated pixel-art Claude mannequin"></canvas>
+      <div class="grid-ov"></div>
+      <div class="vignette"></div>
+      <div class="mosaic" id="mosaic" aria-hidden="true"></div>
+      <div class="stage-foot">
+        <button class="ctrl" id="playBtn" aria-pressed="true">⏸ Pause</button>
+        <button class="ctrl" id="replayBtn">↻ Replay</button>
+        <label class="speed">Speed
+          <input id="speed" type="range" min="0.4" max="1.8" step="0.1" value="1">
+        </label>
+      </div>
+    </section>
+
+    <!-- PICKER -->
+    <nav class="picker" aria-label="Choose animation">
+      <h2>Effort mode</h2>
+      <div id="opts"></div>
+    </nav>
+  </div>
+
+  <footer class="foot">
+    <span>Every frame drawn live on a 240×180 pixel buffer — mannequin, sparks and orbs are code, not sprites.</span>
+    <span>Keys <kbd>1</kbd>–<kbd>5</kbd> switch · <kbd>Space</kbd> play/pause</span>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Pixel engine — low-res buffer, scaled up crisp.
+   ============================================================ */
+const cv = document.getElementById('stage');
+const ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const W = cv.width, H = cv.height;
+
+const PAL = {
+  rust:'#c15f2e', rustL:'#e0894f', rustD:'#8f3f1c', rustXD:'#6a2c12',
+  head:'#cf6b34', headL:'#eb9256',
+  gold:'#ffd76a', goldD:'#f0a93c', white:'#fff5e6',
+  steel:'#3a3550', steelL:'#5a5478', steelD:'#241f38',
+  bug:'#8be04a', bugD:'#4f8f24', bugEye:'#ff5d5d',
+  orb:'#ffd76a', orbB:'#8fd0ff', orbP:'#c79bff',
+  spark:'#ffe89a', flame:'#ff8a3c', flameHot:'#ffd05a',
+};
+
+/* filled pixel disc */
+function disc(x,y,r,c){
+  ctx.fillStyle=c; x=Math.round(x); y=Math.round(y);
+  if(r<=0.6){ ctx.fillRect(x,y,1,1); return; }
+  const rr=r*r;
+  for(let dy=-Math.ceil(r);dy<=Math.ceil(r);dy++){
+    for(let dx=-Math.ceil(r);dx<=Math.ceil(r);dx++){
+      if(dx*dx+dy*dy<=rr) ctx.fillRect(x+dx,y+dy,1,1);
+    }
+  }
+}
+function box(x,y,w,h,c){ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h);}
+/* capsule limb: discs along a segment */
+function limb(x1,y1,x2,y2,r,c){
+  const dx=x2-x1,dy=y2-y1, d=Math.hypot(dx,dy), n=Math.max(1,Math.round(d));
+  for(let i=0;i<=n;i++){ disc(x1+dx*i/n, y1+dy*i/n, r, c); }
+}
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const lerp=(a,b,t)=>a+(b-a)*t;
+/* polar: angle 0 = up(-y), + = clockwise toward +x */
+const px=(a,l)=>Math.sin(a)*l, py=(a,l)=>-Math.cos(a)*l;
+
+/* ============================================================
+   Poseable mannequin (wooden artist-figure, pixel form)
+   pose = {x,y, face(1/-1), spine, head, shl,ell, shr,elr, hipl,knl, hipr,knr, scale}
+   angles in radians.  Returns joint coords for props to hook onto.
+   ============================================================ */
+function mannequin(p){
+  const s = p.scale||1, f=p.face||1;
+  const A=(a)=> f<0 ? -a : a;               // mirror by facing
+  const pelvis={x:p.x, y:p.y};
+  const spineLen=15*s, neckLen=5*s, headLen=8*s;
+  const upArm=9*s, loArm=9*s, upLeg=11*s, loLeg=11*s;
+
+  const spine=A(p.spine||0);
+  const chest={x:pelvis.x+px(spine,spineLen), y:pelvis.y+py(spine,spineLen)};
+  const neck={x:chest.x+px(spine,neckLen), y:chest.y+py(spine,neckLen)};
+  const headA=A(p.head||0);
+  const head={x:neck.x+px(headA,headLen), y:neck.y+py(headA,headLen)};
+
+  // shoulders / hips offset perpendicular to spine
+  const perp=spine+Math.PI/2;
+  const shW=6*s, hpW=4.5*s;
+  const shoR={x:chest.x+px(perp,shW*f), y:chest.y+py(perp,shW*f)};
+  const shoL={x:chest.x-px(perp,shW*f), y:chest.y-py(perp,shW*f)};
+  const hipR={x:pelvis.x+px(perp,hpW*f), y:pelvis.y+py(perp,hpW*f)};
+  const hipL={x:pelvis.x-px(perp,hpW*f), y:pelvis.y-py(perp,hpW*f)};
+
+  function arm(sh,shA,elA){
+    const a1=A(shA), a2=A(shA)+A(elA);
+    const el={x:sh.x+px(a1,upArm), y:sh.y+py(a1,upArm)};
+    const hand={x:el.x+px(a2,loArm), y:el.y+py(a2,loArm)};
+    return {el,hand};
+  }
+  function leg(hp,hA,kA){
+    const a1=A(hA), a2=A(hA)+A(kA);
+    const kn={x:hp.x+px(a1,upLeg), y:hp.y+py(a1,upLeg)};
+    const ft={x:kn.x+px(a2,loLeg), y:kn.y+py(a2,loLeg)};
+    return {kn,ft};
+  }
+  const aR=arm(shoR, p.shr??Math.PI, p.elr??0);
+  const aL=arm(shoL, p.shl??Math.PI, p.ell??0);
+  const lR=leg(hipR, p.hipr??Math.PI, p.knr??0);
+  const lL=leg(hipL, p.hipl??Math.PI, p.knl??0);
+
+  // ---- draw (back limbs darker, then body, then front) ----
+  const R=3.0*s, Rj=3.4*s;
+  // back arm + leg
+  limb(shoL.x,shoL.y,aL.el.x,aL.el.y,R,PAL.rustD);
+  limb(aL.el.x,aL.el.y,aL.hand.x,aL.hand.y,R-0.4,PAL.rustD);
+  disc(aL.hand.x,aL.hand.y,R,PAL.rustXD);
+  limb(hipL.x,hipL.y,lL.kn.x,lL.kn.y,R+0.3,PAL.rustD);
+  limb(lL.kn.x,lL.kn.y,lL.ft.x,lL.ft.y,R,PAL.rustD);
+  disc(lL.ft.x,lL.ft.y,R+0.4,PAL.rustXD);
+  // torso (spine capsule) + pelvis ball
+  limb(pelvis.x,pelvis.y,chest.x,chest.y,4.4*s,PAL.rust);
+  disc(pelvis.x,pelvis.y,4.2*s,PAL.rustD);
+  disc(chest.x,chest.y,4.6*s,PAL.rust);
+  // shoulders/hips ball joints
+  disc(shoL.x,shoL.y,Rj,PAL.rustD); disc(hipL.x,hipL.y,Rj,PAL.rustD);
+  disc(shoR.x,shoR.y,Rj,PAL.rust);  disc(hipR.x,hipR.y,Rj,PAL.rust);
+  // front leg
+  limb(hipR.x,hipR.y,lR.kn.x,lR.kn.y,R+0.5,PAL.rust);
+  disc(lR.kn.x,lR.kn.y,Rj-0.3,PAL.rustD);
+  limb(lR.kn.x,lR.kn.y,lR.ft.x,lR.ft.y,R+0.2,PAL.rustL);
+  disc(lR.ft.x,lR.ft.y,R+0.6,PAL.rust);
+  // neck + head
+  limb(neck.x,neck.y,chest.x,chest.y,2.6*s,PAL.rustD);
+  disc(head.x,head.y,7*s,PAL.head);
+  disc(head.x-2*f*s,head.y-1.5*s,2.4*s,PAL.headL); // highlight
+  // front arm
+  limb(shoR.x,shoR.y,aR.el.x,aR.el.y,R+0.3,PAL.rust);
+  disc(aR.el.x,aR.el.y,Rj-0.4,PAL.rustD);
+  limb(aR.el.x,aR.el.y,aR.hand.x,aR.hand.y,R,PAL.rustL);
+  disc(aR.hand.x,aR.hand.y,R+0.4,PAL.rust);
+
+  return {pelvis,chest,neck,head,shoR,shoL,hipR,hipL,
+          elR:aR.el,handR:aR.hand,elL:aL.el,handL:aL.hand,
+          knR:lR.kn,footR:lR.ft,knL:lL.kn,footL:lL.ft};
+}
+
+/* ground shadow */
+function shadow(x,y,w){ctx.fillStyle='rgba(20,6,44,.34)';
+  for(let i=-w;i<=w;i++){const h=Math.round(Math.sqrt(Math.max(0,w*w-i*i))*0.34);ctx.fillRect(Math.round(x+i),Math.round(y-h/2),1,Math.max(1,h));}}
+
+/* ============================================================
+   Particle pool
+   ============================================================ */
+let parts=[];
+function spawn(o){parts.push(Object.assign({x:0,y:0,vx:0,vy:0,g:0,life:30,age:0,r:1,c:PAL.gold,fade:true,shrink:false},o));}
+function stepParts(dt){
+  for(const p of parts){p.age+=dt;p.vy+=p.g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;}
+  parts=parts.filter(p=>p.age<p.life);
+}
+function drawParts(){
+  for(const p of parts){
+    const t=p.age/p.life;
+    let r=p.r; if(p.shrink) r=Math.max(0.6,p.r*(1-t));
+    disc(p.x,p.y,r,p.c);
+    if(p.glow) disc(p.x,p.y,r+1,p.c==PAL.gold?'rgba(255,215,106,.25)':'rgba(255,255,255,.18)');
+  }
+}
+
+/* ============================================================
+   Backgrounds
+   ============================================================ */
+function bgViolet(t,shake){
+  // vertical gradient painted as pixel bands
+  for(let y=0;y<H;y++){
+    const k=y/H;
+    const r=Math.round(lerp(0x6a,0x33,k)), g=Math.round(lerp(0x4b,0x1e,k)), b=Math.round(lerp(0xc0,0x60,k));
+    ctx.fillStyle=`rgb(${r},${g},${b})`; ctx.fillRect(0,y,W,1);
+  }
+  // soft glow blob top-right
+  const gx=W*0.74, gy=H*0.30;
+  for(let i=0;i<46;i++){const a=i/46;disc(gx,gy,40*(1-a),`rgba(150,110,240,${0.020})`);}
+}
+const stars=Array.from({length:46},()=>({x:rnd(0,W),y:rnd(0,H),s:rnd(0.6,1.6),ph:rnd(0,6.28),sp:rnd(6,16)}));
+
+/* ============================================================
+   Ground floor line (subtle)
+   ============================================================ */
+function floor(y){for(let x=0;x<W;x+=1){const a=(x%6<3)?0.10:0.05;ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fillRect(x,y,1,1);} }
+
+/* ============================================================
+   THE FIVE ANIMATIONS
+   ============================================================ */
+const GY = H-34;               // ground y for standing figures
+const CX = W*0.42;             // character x
+
+// 1) FORGE — hammering code, sparks
+function forge(t){
+  bgViolet(t);
+  floor(GY+16);
+  // anvil / keyboard block
+  const ax=CX+30, ay=GY+8;
+  box(ax-14,ay,28,10,PAL.steelD); box(ax-14,ay,28,3,PAL.steelL); box(ax-10,ay+10,20,5,PAL.steel);
+  // glowing workpiece (code chunk)
+  const hot=(Math.sin(t*7)*0.5+0.5);
+  box(ax-4,ay-4,8,5, hot>0.5?PAL.flameHot:PAL.gold); box(ax-2,ay-5,4,2,PAL.white);
+  const swing=Math.sin(t*6);                     // hammer swing
+  const strike=swing>0.85;
+  shadow(CX+4,GY+16,15);
+  const arm = Math.PI - 0.5 + (swing*0.9);        // front arm raises hammer
+  const m=mannequin({x:CX,y:GY,face:1,scale:1,
+    spine:0.28, head:0.34,
+    shr:arm, elr:-0.7 - swing*0.4,
+    shl:Math.PI-2.4, ell:-0.5,
+    hipr:Math.PI+0.5, knr:0.7,
+    hipl:Math.PI-0.35, knl:0.5});
+  // hammer in front hand
+  const hx=m.handR.x, hy=m.handR.y, ha=arm-0.7 - swing*0.4;
+  limb(hx,hy, hx+px(ha,10),hy+py(ha,10), 1.6, '#6b5a44');
+  const headx=hx+px(ha,11), heady=hy+py(ha,11);
+  box(headx-3,heady-2,6,4,PAL.steelL); box(headx-3,heady-2,6,1,'#cfc8e6');
+  // sparks on strike
+  if(strike && Math.random()<0.9){
+    for(let i=0;i<7;i++) spawn({x:ax,y:ay-3,vx:rnd(-1.6,1.6),vy:rnd(-2.4,-0.4),g:0.09,life:rnd(14,26),r:rnd(0.8,1.6),c:Math.random()<0.5?PAL.gold:PAL.spark,g:0.10,glow:true,shrink:true});
+  }
+}
+
+// 2) DEPLOY — rocket ride
+function deploy(t){
+  bgViolet(t);
+  for(const s of stars){const tw=0.5+0.5*Math.sin(t*s.sp*0.2+s.ph);disc(s.x,(s.y+t*22*s.s)%H,s.s*0.9,`rgba(255,255,255,${0.25+tw*0.5})`);}
+  const cx=CX+16, base=GY-6 + Math.sin(t*3)*2;   // rocket hover bob
+  // exhaust
+  for(let i=0;i<5;i++) spawn({x:cx+rnd(-2,2),y:base+16,vx:rnd(-0.5,0.5),vy:rnd(1.6,3.2),g:0,life:rnd(10,20),r:rnd(1.2,2.4),c:Math.random()<0.5?PAL.flame:PAL.flameHot,glow:true,shrink:true});
+  drawParts();
+  // rocket body
+  box(cx-5,base-6,10,18,'#d9d3ec'); box(cx-5,base-6,10,4,'#b7afd8');
+  box(cx-2,base-3,4,4,'#7fb0ff');                 // window
+  // nose
+  ctx.fillStyle=PAL.rust; for(let i=0;i<7;i++)ctx.fillRect(cx-(6-i)+1,base-6-7+i,2*(6-i)-2,1);
+  box(cx-8,base+6,4,7,PAL.rust); box(cx+4,base+6,4,7,PAL.rust); // fins
+  // mannequin clinging on top, arm raised
+  const raise=Math.sin(t*5)*0.3;
+  mannequin({x:cx,y:base-8,face:1,scale:0.82,
+    spine:-0.15,head:-0.2,
+    shr:0.5+raise, elr:0.3, shl:Math.PI-0.4, ell:0.6,
+    hipr:Math.PI-0.2,knr:1.5, hipl:Math.PI+0.2,knl:1.5});
+}
+
+// 3) PARALLEL — juggling task orbs
+function parallel(t){
+  bgViolet(t);
+  floor(GY+16);
+  shadow(CX,GY+16,14);
+  const bob=Math.sin(t*4)*1.5;
+  const m=mannequin({x:CX,y:GY-bob,face:1,scale:1,
+    spine:0.03,head:-0.05,
+    shr:Math.PI-2.5+Math.sin(t*6)*0.25, elr:-1.15,
+    shl:Math.PI+2.5-Math.sin(t*6)*0.25, ell:1.15,
+    hipr:Math.PI+0.28,knr:0.4, hipl:Math.PI-0.28,knl:0.4});
+  // 3 orbs on a figure-8/arc path between the two hands
+  const cols=[PAL.orb,PAL.orbB,PAL.orbP];
+  const hx=(m.handL.x+m.handR.x)/2, hy=Math.min(m.handL.y,m.handR.y)-2;
+  const spanX=(m.handR.x-m.handL.x)/2+4;
+  for(let i=0;i<3;i++){
+    const ph=t*3 + i*(Math.PI*2/3);
+    const ox=hx+Math.sin(ph)*spanX;
+    const oy=hy-16 + Math.abs(Math.cos(ph))*-14 + Math.sin(ph*1)* -0 ; // arc up
+    const yy=hy - (Math.sin(ph)*0+ (1+Math.cos(ph))*0) - (14*(0.5+0.5*Math.cos(ph)));
+    disc(ox,yy,3.2,cols[i]); disc(ox-1,yy-1,1.3,PAL.white);
+    disc(ox,yy,4.4,'rgba(255,255,255,.10)');
+    if(Math.random()<0.25) spawn({x:ox,y:yy,vx:rnd(-.3,.3),vy:rnd(-.2,.4),g:0,life:rnd(8,16),r:1,c:cols[i],shrink:true,glow:true});
+  }
+  drawParts();
+}
+
+// 4) DEBUG — whacking pixel bugs
+let bugs=[];
+function ensureBugs(){ if(bugs.length<3 && Math.random()<0.06){ bugs.push({x:W+6,y:GY+2-rnd(0,6),vx:-rnd(0.3,0.6),wig:rnd(0,6.28),dead:0}); } }
+function debug(t){
+  bgViolet(t);
+  floor(GY+16);
+  ensureBugs();
+  const swing=Math.sin(t*5);
+  const strike=swing>0.8;
+  shadow(CX,GY+16,13);
+  const arm=Math.PI-1.6 - Math.max(0,swing)*1.3;
+  const m=mannequin({x:CX,y:GY,face:1,scale:1,
+    spine:0.12,head:0.1,
+    shr:arm, elr:-0.4,
+    shl:Math.PI-1.9, ell:-0.7,
+    hipr:Math.PI+0.42,knr:0.55, hipl:Math.PI-0.42,knl:0.55});
+  // mallet
+  const ha=arm-0.4;
+  const hx=m.handR.x,hy=m.handR.y;
+  const ex=hx+px(ha,11), ey=hy+py(ha,11);
+  limb(hx,hy,ex,ey,1.6,'#6b5a44');
+  box(ex-3,ey-3,7,6,PAL.steelL); box(ex-3,ey-3,7,2,'#d3cdea');
+  // strike zone
+  const zx=ex, zy=ey+3;
+  // bugs
+  for(const b of bugs){
+    if(b.dead){b.dead+=1;continue;}
+    b.x+=b.vx; b.wig+=0.3;
+    const by=b.y+Math.sin(b.wig)*1.2;
+    // body
+    disc(b.x,by,3,PAL.bug); disc(b.x+1,by-1,1.2,PAL.white);
+    box(b.x-1,by-1,1,1,PAL.bugEye); box(b.x+1,by-1,1,1,PAL.bugEye);
+    // legs
+    for(let s=-1;s<=1;s+=2){box(b.x+3*s,by,2*s,1,PAL.bugD);box(b.x+3*s,by+1,2*s,1,PAL.bugD);}
+    // hit?
+    if(strike && Math.abs(b.x-zx)<6 && Math.abs(by-zy)<6){
+      b.dead=1;
+      for(let i=0;i<10;i++) spawn({x:b.x,y:by,vx:rnd(-2,2),vy:rnd(-2.2,0.4),g:0.12,life:rnd(12,22),r:rnd(0.8,1.6),c:Math.random()<0.5?PAL.bug:PAL.gold,glow:true,shrink:true});
+    }
+  }
+  bugs=bugs.filter(b=>!(b.dead>=2)&&b.x>-8);
+  drawParts();
+}
+
+// 5) OVERCLOCK — power-up aura + shake
+function overclock(t){
+  const charge=(Math.sin(t*1.3-1.2)*0.5+0.5);   // 0..1 breathing
+  const shk=charge*2.2;
+  ctx.save(); ctx.translate(Math.round(rnd(-shk,shk)),Math.round(rnd(-shk,shk)));
+  bgViolet(t);
+  floor(GY+16);
+  // rising energy motes
+  if(Math.random()<0.7) spawn({x:CX+rnd(-14,14),y:GY+14,vx:rnd(-.2,.2),vy:-rnd(0.8,2.2),g:0,life:rnd(18,34),r:rnd(0.8,1.8),c:Math.random()<0.5?PAL.gold:'#b98cff',glow:true,shrink:true});
+  // aura rings
+  for(let i=0;i<3;i++){
+    const rr=10+i*7+Math.sin(t*4-i)*2 + charge*8;
+    ctx.strokeStyle=`rgba(255,215,106,${0.10+0.10*charge})`;
+    ctx.beginPath();ctx.arc(CX,GY-16,rr,0,7);ctx.stroke();
+  }
+  shadow(CX,GY+16,13+charge*4);
+  drawParts();
+  // power pose: arms down/back, chest out, then fists clench
+  const flex=charge;
+  mannequin({x:CX,y:GY-flex*2,face:1,scale:1+charge*0.04,
+    spine:-0.06-flex*0.05, head:-0.12,
+    shr:Math.PI-0.7-flex*0.5, elr:1.5+flex*0.4,
+    shl:Math.PI+0.7+flex*0.5, ell:-1.5-flex*0.4,
+    hipr:Math.PI+0.5,knr:0.7, hipl:Math.PI-0.5,knl:0.7});
+  // lightning flashes at peak
+  if(charge>0.9 && Math.random()<0.3){
+    ctx.strokeStyle=PAL.white;ctx.beginPath();
+    let lx=CX+rnd(-20,20),ly=GY-40;ctx.moveTo(lx,ly);
+    for(let i=0;i<4;i++){lx+=rnd(-5,5);ly+=8;ctx.lineTo(lx,ly);}ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ============================================================
+   Scene registry + selector UI
+   ============================================================ */
+const SCENES=[
+  {id:'forge', tag:'FORGE', name:'Ultracode', desc:'Hammering code · sparks fly', blurb:'The classic — mannequin forging a build while the workpiece glows.', fn:forge},
+  {id:'deploy',tag:'DEPLOY',name:'Ship it',   desc:'Rocket ride to prod',        blurb:'Rides the deploy rocket up through a drifting starfield.', fn:deploy},
+  {id:'parallel',tag:'PARALLEL',name:'Parallel', desc:'Juggling three tasks',    blurb:'Keeps three task orbs in the air at once, never drops one.', fn:parallel},
+  {id:'debug', tag:'DEBUG', name:'Debug',      desc:'Whack the pixel bugs',      blurb:'Mallet out, squashing bugs that scuttle in from the edge.', fn:debug},
+  {id:'over',  tag:'OVERCLOCK',name:'Overclock',desc:'Max effort · powering up', blurb:'Charges an aura, screen shakes, lightning cracks at the peak.', fn:overclock},
+];
+let cur=0, playing=true, speed=1, tGlobal=0, last=performance.now();
+
+/* build selector */
+const optsEl=document.getElementById('opts');
+SCENES.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='opt'; b.setAttribute('role','option'); b.setAttribute('aria-selected', i===0?'true':'false');
+  b.innerHTML=`<canvas class="ico" width="20" height="20"></canvas>
+    <span class="txt"><b>${s.name}</b><span>${s.blurb}</span></span>
+    <span class="num">0${i+1}</span>`;
+  b.addEventListener('click',()=>select(i));
+  optsEl.appendChild(b);
+});
+const optButtons=[...optsEl.querySelectorAll('.opt')];
+
+/* mosaic reveal setup */
+const mosaic=document.getElementById('mosaic');
+const MC=14, MR=10;
+mosaic.style.gridTemplateColumns=`repeat(${MC},1fr)`;
+mosaic.style.gridTemplateRows=`repeat(${MR},1fr)`;
+const tiles=[];
+for(let i=0;i<MC*MR;i++){const el=document.createElement('i');mosaic.appendChild(el);tiles.push(el);}
+function playMosaic(){
+  const order=[...tiles.keys()].sort((a,b)=>{
+    const ax=a%MC, ay=(a/MC)|0, bx=b%MC, by=(b/MC)|0;
+    return (ax+ay+Math.random()*3)-(bx+by+Math.random()*3);
+  });
+  tiles.forEach(t=>{t.style.transition='none';t.style.opacity='1';});
+  // force reflow
+  void mosaic.offsetWidth;
+  order.forEach((idx,k)=>{
+    const t=tiles[idx];
+    t.style.transition='opacity .28s ease';
+    t.style.transitionDelay=(k*7)+'ms';
+    t.style.opacity='0';
+  });
+}
+
+function select(i){
+  cur=i;
+  optButtons.forEach((b,k)=>b.setAttribute('aria-selected',k===i?'true':'false'));
+  const s=SCENES[i];
+  document.getElementById('stName').textContent=s.name;
+  document.getElementById('stDesc').textContent=s.desc;
+  document.getElementById('stTag').textContent=s.tag;
+  parts=[]; bugs=[]; tGlobal=0;
+  if(!reduce) playMosaic();
+  if(!playing) togglePlay(true);
+}
+
+/* controls */
+const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+const playBtn=document.getElementById('playBtn');
+function togglePlay(force){
+  playing = force!==undefined?force:!playing;
+  playBtn.textContent = playing?'⏸ Pause':'▶ Play';
+  playBtn.setAttribute('aria-pressed',playing);
+  if(playing){last=performance.now();requestAnimationFrame(loop);}
+}
+playBtn.addEventListener('click',()=>togglePlay());
+document.getElementById('replayBtn').addEventListener('click',()=>{parts=[];bugs=[];tGlobal=0;if(!reduce)playMosaic();if(!playing)togglePlay(true);});
+document.getElementById('speed').addEventListener('input',e=>speed=+e.target.value);
+
+document.addEventListener('keydown',e=>{
+  if(e.key>='1'&&e.key<='5'){select(+e.key-1);}
+  else if(e.code==='Space'){e.preventDefault();togglePlay();}
+});
+
+/* thumbnails: draw a static-ish pose per scene */
+function drawThumbs(){
+  optButtons.forEach((b,i)=>{
+    const c=b.querySelector('.ico'), x=c.getContext('2d'); x.imageSmoothingEnabled=false;
+    // temporarily retarget global ctx via a mini render is heavy; draw simple emblem
+    x.fillStyle='#3a2470';x.fillRect(0,0,20,20);
+    x.fillStyle=PAL.rust;
+    const em=[['forge',[9,4,2,6]],['deploy',[9,3,2,8]],['parallel',[9,5,2,4]],['debug',[9,5,2,5]],['over',[9,4,2,6]]][i][1];
+    x.fillRect(em[0],em[1],em[2],em[3]); // torso
+    x.fillStyle=PAL.head;x.fillRect(em[0]-1,em[1]-4,4,4); // head
+    x.fillStyle=PAL.gold;
+    if(i===0){x.fillRect(13,7,3,1);x.fillRect(15,5,1,1);}
+    if(i===1){x.fillRect(9,13,2,4);x.fillStyle=PAL.flame;x.fillRect(9,16,2,3);}
+    if(i===2){x.fillRect(6,4,2,2);x.fillStyle=PAL.orbB;x.fillRect(13,4,2,2);x.fillStyle=PAL.orbP;x.fillRect(10,2,2,2);}
+    if(i===3){x.fillStyle=PAL.bug;x.fillRect(3,13,3,2);}
+    if(i===4){x.fillStyle=PAL.gold;x.fillRect(7,2,1,1);x.fillRect(13,3,1,1);x.fillRect(5,9,1,1);x.fillRect(15,10,1,1);}
+  });
+}
+drawThumbs();
+
+/* main loop — real-time seconds */
+function loop(now){
+  if(!playing) return;
+  let dt=(now-last)/1000; last=now; if(dt>0.06) dt=0.06;   // clamp big gaps
+  const df=dt*60*speed;                                    // delta in frames
+  tGlobal+=dt*speed;
+  ctx.clearRect(0,0,W,H);
+  SCENES[cur].fn(tGlobal);
+  stepParts(df);
+  requestAnimationFrame(loop);
+}
+last=performance.now();
+if(reduce){                                                // one static frame
+  ctx.clearRect(0,0,W,H); SCENES[cur].fn(1.2);
+  playing=false; playBtn.textContent='▶ Play'; playBtn.setAttribute('aria-pressed','false');
+}else{
+  requestAnimationFrame(loop);
+  playMosaic();
+}
+</script>
