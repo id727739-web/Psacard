@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify a Certificate — GradeVault</title>
+  <meta name="description" content="Look up a GradeVault certificate number to confirm a card's grade, category, and details.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html"><img src="assets/logo.svg" alt=""><span>Grade<b>Vault</b></span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="verify.html">Verify a Card</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="verify.html" class="btn btn-ghost">Cert Lookup</a>
+        <a href="services.html" class="btn btn-primary">Submit Cards</a>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Certificate Lookup</p>
+      <h1>Verify a GradeVault certificate</h1>
+      <p>Enter the certificate number printed on the case label to confirm the card's grade and details. Great for checking a card before you buy.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="verify-box">
+        <form class="verify-form" id="verify-form">
+          <input type="text" id="cert-input" placeholder="Enter certificate number" aria-label="Certificate number">
+          <button class="btn btn-primary" type="submit">Look up</button>
+        </form>
+        <div class="result" id="verify-result" aria-live="polite"></div>
+        <p class="form-note" style="margin-top:1rem">
+          This is a demo lookup with sample records. Try <strong>10025431</strong>, <strong>10025432</strong>, or <strong>10025433</strong>.
+          Connect it to your real database by editing <code>js/verify.js</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Why verify?</p>
+        <h2>Buy and sell with confidence</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card"><div class="ico" aria-hidden="true">⚑</div><h3>Confirm the grade</h3><p class="muted">Make sure the label matches the certificate on record.</p></div>
+        <div class="card"><div class="ico" aria-hidden="true">◎</div><h3>Spot tampering</h3><p class="muted">Details that don't match may signal a swapped or altered case.</p></div>
+        <div class="card"><div class="ico" aria-hidden="true">≣</div><h3>Check population</h3><p class="muted">See how many examples exist at each grade.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="index.html"><img src="assets/logo.svg" alt=""><span>Grade<b>Vault</b></span></a>
+          <p class="muted" style="margin-top:.8rem;max-width:28ch">Trusted grading, authentication, and encapsulation for trading cards.</p>
+        </div>
+        <div><h4>Services</h4><ul><li><a href="services.html">Grading</a></li><li><a href="services.html">Authentication</a></li><li><a href="services.html">Crossover</a></li><li><a href="services.html">Bulk program</a></li></ul></div>
+        <div><h4>Resources</h4><ul><li><a href="verify.html">Cert lookup</a></li><li><a href="services.html">Turnaround times</a></li><li><a href="about.html">Grading scale</a></li><li><a href="contact.html">Support</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="contact.html">Careers</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2025</span> GradeVault. Sample template — replace with your own brand.</span>
+        <span>Privacy · Terms</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/verify.js"></script>
+</body>
+</html>

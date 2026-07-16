@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — GradeVault</title>
+  <meta name="description" content="Get in touch with GradeVault about grading, submissions, or support.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html"><img src="assets/logo.svg" alt=""><span>Grade<b>Vault</b></span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="verify.html">Verify a Card</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="verify.html" class="btn btn-ghost">Cert Lookup</a>
+        <a href="services.html" class="btn btn-primary">Submit Cards</a>
+        <button class="nav-toggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Contact</p>
+      <h1>We're here to help</h1>
+      <p>Questions about a submission, a certificate, or which service to choose? Send us a note and we'll get back to you.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid grid-2" style="gap:2.4rem;align-items:start">
+      <div class="card">
+        <h3 class="mt-0">Send a message</h3>
+        <form id="contact-form" onsubmit="return false">
+          <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="topic">Topic</label>
+            <select id="topic" name="topic">
+              <option>New submission</option>
+              <option>Existing order</option>
+              <option>Certificate question</option>
+              <option>Dealer / bulk program</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+          </div>
+          <button class="btn btn-primary btn-lg" type="submit">Send message</button>
+          <p class="form-note" id="contact-note" style="margin-top:.8rem">
+            This demo form doesn't send anything yet. Wire it to your email service or backend
+            (e.g. a form handler) in <code>contact.html</code>.
+          </p>
+        </form>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <h3 class="mt-0">Support</h3>
+          <p class="muted">support@example.com<br>Mon–Fri, 9am–5pm</p>
+        </div>
+        <div class="card">
+          <h3 class="mt-0">Submissions</h3>
+          <p class="muted">Ship insured, tracked packages to your intake address. Add your real address here.</p>
+        </div>
+        <div class="card">
+          <h3 class="mt-0">Dealer program</h3>
+          <p class="muted">High volume? Ask about discounted bulk rates and priority handling.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="index.html"><img src="assets/logo.svg" alt=""><span>Grade<b>Vault</b></span></a>
+          <p class="muted" style="margin-top:.8rem;max-width:28ch">Trusted grading, authentication, and encapsulation for trading cards.</p>
+        </div>
+        <div><h4>Services</h4><ul><li><a href="services.html">Grading</a></li><li><a href="services.html">Authentication</a></li><li><a href="services.html">Crossover</a></li><li><a href="services.html">Bulk program</a></li></ul></div>
+        <div><h4>Resources</h4><ul><li><a href="verify.html">Cert lookup</a></li><li><a href="services.html">Turnaround times</a></li><li><a href="about.html">Grading scale</a></li><li><a href="contact.html">Support</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li><a href="contact.html">Careers</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2025</span> GradeVault. Sample template — replace with your own brand.</span>
+        <span>Privacy · Terms</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
